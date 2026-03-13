@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Obiettivi Personali</title>
+    <style>
+        body { background: #e0f2f1; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #004d40; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 100vh; margin: 0; }
+        h2 { margin-top: 32px; }
+        textarea { width: 90vw; max-width: 500px; height: 250px; margin-top: 24px; border-radius: 12px; border: 1px solid #80cbc4; padding: 16px; font-size: 1.1rem; }
+        .back { margin-top: 24px; background: #00796b; color: #fff; border: none; border-radius: 24px; padding: 12px 32px; font-size: 1rem; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div style="display:flex; flex-direction:column; align-items:center; width:100vw; max-width:100vw;">
+        <h2>Obiettivi Personali</h2>
+        <textarea id="obiettivi-txt" placeholder="Scrivi qui i tuoi obiettivi personali..."></textarea>
+        <button class="back" onclick="window.history.back()">Chiudi</button>
+        <script>
+            document.querySelector('.back').addEventListener('click', function() {
+                localStorage.setItem('skipPopupEmozioni', '1');
+            });
+        </script>
+        <div style="width:100%; max-width:500px; margin-top:24px;">
+            <div id="desc-title-ob" style="cursor:pointer; text-decoration:underline; font-weight:bold; color:#00796b;">Perché scrivere i tuoi obiettivi?</div>
+            <div id="desc-content-ob" style="max-height:0; overflow:hidden; transition:max-height 0.4s cubic-bezier(0.4,0,0.2,1); background:rgba(178,223,219,0.85); border-radius:18px; color:#004d40; font-size:1.05rem; box-shadow:0 2px 8px rgba(0,0,0,0.04); padding:0 18px;">
+                <div style="padding-top:8px;">
+                    Scrivere i tuoi obiettivi personali ti aiuta a chiarire le tue priorità, aumentare la motivazione e monitorare i tuoi progressi. Mettere nero su bianco ciò che desideri raggiungere rende più probabile il successo e ti permette di visualizzare i tuoi traguardi, rafforzando l'impegno verso di essi.
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const obiettiviTxt = document.getElementById('obiettivi-txt');
+        // Carica il testo salvato
+        obiettiviTxt.value = localStorage.getItem('obiettivi-personali') || '';
+        // Salva ogni cambiamento
+        obiettiviTxt.addEventListener('input', () => {
+            localStorage.setItem('obiettivi-personali', obiettiviTxt.value);
+        });
+
+        // Accordion descrizione
+        const descTitleOb = document.getElementById('desc-title-ob');
+        const descContentOb = document.getElementById('desc-content-ob');
+        descTitleOb.addEventListener('click', function() {
+            if (descContentOb.style.maxHeight && descContentOb.style.maxHeight !== '0px') {
+                descContentOb.style.maxHeight = '0';
+            } else {
+                descContentOb.style.maxHeight = descContentOb.scrollHeight + 'px';
+            }
+        });
+    </script>
+</body>
+</html>

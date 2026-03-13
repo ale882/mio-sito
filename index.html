@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MindCare</title>
+    <link rel="manifest" href="manifest.json">
+    <script src="citazioni.js"></script>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://via.placeholder.com/192">
+
+    <style>
+        /* Reset e Stile Base */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            text-align: center; 
+            background: linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%); 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            overflow: hidden; 
+            color: #004d40;
+        }
+
+        /* Contenitore Animazione */
+        .watch-face {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 250px;
+            width: 250px;
+            position: relative;
+        }
+
+        /* Il Cerchio che si anima (Guida Respiro) */
+        .circle {
+            background-color: rgba(77, 182, 172, 0.6);
+            height: 100px;
+            width: 100px;
+            border-radius: 50%;
+            position: absolute;
+            transform: scale(1);
+            /* L'animazione base è ferma */
+        }
+
+        /* La classe che attiva l'animazione di 8 secondi (4 in, 4 out) */
+        .circle.animate {
+            animation: breathe 8s infinite ease-in-out;
+        }
+
+        /* Testo centrale "Respira" */
+        #breathe-text {
+            z-index: 10;
+            font-size: 1.2rem;
+            font-weight: bold;
+            opacity: 0; /* Nascosto all'inizio */
+        }
+
+        /* Definizione dell'Animazione */
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); background-color: rgba(77, 182, 172, 0.6); } /* Espira - piccolo */
+            50% { transform: scale(2.5); background-color: rgba(128, 203, 196, 0.8); } /* Inspira - grande */
+        }
+
+        /* Controlli e Bottone */
+        .controls { margin-top: 40px; padding: 0 20px; }
+        button { 
+            padding: 15px 35px; 
+            font-size: 18px; 
+            cursor: pointer; 
+            border-radius: 50px; 
+            border: none; 
+            background: #00796b; 
+            color: white; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+        }
+        button:active { transform: translateY(2px); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        button:disabled { background: #b0bec5; cursor: not-allowed; }
+
+        h1 { font-size: 2.2rem; margin-bottom: 10px; }
+        p.subtitle { font-size: 1rem; margin-bottom: 30px; opacity: 0.8; }
+
+        /* Home Buttons Grid */
+        .home-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin: 40px 0 0 0;
+            width: 100%;
+            max-width: 400px;
+        }
+        .home-btn {
+            background: linear-gradient(135deg, #80cbc4 0%, #26a69a 100%);
+            color: #fff;
+            border: none;
+            border-radius: 24px;
+            padding: 32px 10px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: background 0.2s, transform 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .home-btn:active {
+            background: linear-gradient(135deg, #4db6ac 0%, #00897b 100%);
+            transform: scale(0.97);
+        }
+        @media (max-width: 500px) {
+            .home-buttons { grid-template-columns: 1fr; gap: 18px; }
+        }
+    </style>
+</head>
+<body>
+
+
+    <!-- POPUP EMOTICON ALL'AVVIO -->
+    <div id="popup-emozioni" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(224,242,241,0.98);z-index:100;display:flex;flex-direction:column;justify-content:center;align-items:center;">
+        <div style="background:#fff;border-radius:24px;padding:32px 24px;box-shadow:0 4px 24px rgba(0,0,0,0.08);text-align:center;max-width:90vw;">
+            <div style="font-size:1.3rem;margin-bottom:18px;color:#00796b;font-weight:600;">Come ti senti in questo momento?</div>
+            <div style="display:flex;gap:32px;justify-content:center;margin-bottom:18px;">
+                <span class="emozione-btn" data-emozione="triste" style="font-size:2.5rem;cursor:pointer;">😢</span>
+                <span class="emozione-btn" data-emozione="neutra" style="font-size:2.5rem;cursor:pointer;">😐</span>
+                <span class="emozione-btn" data-emozione="felice" style="font-size:2.5rem;cursor:pointer;">😊</span>
+            </div>
+            <div id="risposta-emozione" style="min-height:32px;font-size:1.1rem;color:#004d40;margin-bottom:10px;"></div>
+            <div id="citazione-triste" style="color:#00897b;font-size:1rem;margin-top:8px;"></div>
+            <button id="chiudi-popup-emozioni" style="display:none;margin-top:18px;background:#00796b;color:#fff;border:none;border-radius:18px;padding:8px 28px;font-size:1rem;cursor:pointer;">Continua</button>
+        </div>
+    </div>
+
+    <div class="controls">
+
+        <div id="citazione-relax" style="margin-bottom:18px; font-size:1.1rem; color:#00897b; min-height:24px;"></div>
+        <h1>MindCare 🌿</h1>
+        <p class="subtitle">Trova il tuo equilibrio.</p>
+
+        <div class="home-buttons">
+            <button class="home-btn" id="btn-meditazione">🧘‍♂️<br>Esercizio di respirazione</button>
+            <button class="home-btn" onclick="window.location.href='obiettivi.html'">🎯<br>Obiettivi Personali</button>
+            <button class="home-btn" onclick="window.location.href='worry.html'">😟<br>Worry Box</button>
+            <button class="home-btn" onclick="window.location.href='joyful.html'">😊<br>Joyful Box</button>
+        </div>
+        <p id="pausa-reminder" style="margin-top:32px; font-size:1.1rem; color:#00796b; cursor:pointer; text-decoration:underline;">Ricordami di fare una pausa ogni ora</p>
+    </div>
+
+    <!-- Bolla di respirazione rimossa dalla home -->
+
+    <!-- Overlay per l'esercizio di respirazione -->
+    <div id="meditazione-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(224,242,241,0.98); z-index:10; justify-content:center; align-items:center; flex-direction:column;">
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; width:100vw; height:100vh;">
+            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                <div id="meditazione-bubble" style="background:#80cbc4; border-radius:50%; width:220px; height:220px; display:flex; align-items:center; justify-content:center; font-size:1.7rem; color:#004d40; box-shadow:0 4px 16px rgba(0,0,0,0.08); cursor:pointer; transition:all 0.3s; flex-direction:column; min-width:220px; min-height:220px; margin-bottom:32px;">
+                    <span id="meditazione-label">Respirazione</span>
+                    <span id="meditazione-countdown" style="font-size:2.5rem; font-weight:bold; margin-top:10px; color:#00796b; display:none;"></span>
+                </div>
+                <button onclick="closeMeditazione()" style="background:#00796b; color:#fff; border:none; border-radius:24px; padding:14px 38px; font-size:1.1rem; cursor:pointer; margin-top:0;">Chiudi</button>
+                <div style="width:100%; max-width:500px; margin-top:24px;">
+                    <div id="desc-title-breath" style="cursor:pointer; text-decoration:underline; font-weight:bold; color:#00796b;">Perché praticare la tecnica 4-7-8?</div>
+                    <div id="desc-content-breath" style="max-height:0; overflow:hidden; transition:max-height 0.4s cubic-bezier(0.4,0,0.2,1); background:rgba(255,255,255,0.85); border-radius:18px; color:#004d40; font-size:1.05rem; box-shadow:0 2px 8px rgba(0,0,0,0.04); padding:0 18px;">
+                        <div style="padding-top:8px;">
+                            Questa tecnica aiuta a calmare il sistema nervoso, ridurre lo stress e favorire il rilassamento. Può migliorare la qualità del sonno, abbassare la pressione sanguigna e aiutarti a gestire l'ansia nei momenti di tensione.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottone Attiva MindCare e testo promemoria rimossi dalla home -->
+
+    <script>
+                                        // Accordion descrizione tecnica respirazione
+                                        const descTitleBreath = document.getElementById('desc-title-breath');
+                                        const descContentBreath = document.getElementById('desc-content-breath');
+                                        if (descTitleBreath && descContentBreath) {
+                                            descTitleBreath.addEventListener('click', function() {
+                                                if (descContentBreath.style.maxHeight && descContentBreath.style.maxHeight !== '0px') {
+                                                    descContentBreath.style.maxHeight = '0';
+                                                } else {
+                                                    descContentBreath.style.maxHeight = descContentBreath.scrollHeight + 'px';
+                                                }
+                                            });
+                                        }
+                                // --- POPUP EMOZIONI ALL'AVVIO ---
+                                const popupEmozioni = document.getElementById('popup-emozioni');
+                                const emozioneBtns = document.querySelectorAll('.emozione-btn');
+                                const rispostaEmozione = document.getElementById('risposta-emozione');
+                                const citazioneTriste = document.getElementById('citazione-triste');
+                                const chiudiPopupEmozioni = document.getElementById('chiudi-popup-emozioni');
+
+                                // Risposte randomiche per ogni emozione
+                                const risposteFelice = ["Bene, continua così!", "Ottimo! Mantieni questa energia!", "Fantastico, prosegui così!"];
+                                const risposteNeutra = ["Puoi sempre migliorare!", "Forza, la giornata può solo migliorare!", "Cerca qualcosa che ti faccia sorridere!"];
+                                const risposteTriste = ["Mi dispiace.", "Andrà meglio, coraggio!", "Non sei solo/a."];
+
+                                // Citazioni per rallegrare (puoi aggiungerne altre)
+                                const citazioniTristi = [
+                                    "Anche la notte più buia finirà e il sole sorgerà. — Victor Hugo",
+                                    "Ogni giorno può essere un nuovo inizio.",
+                                    "Non arrenderti, il meglio deve ancora venire.",
+                                    "Sii gentile con te stesso, stai facendo del tuo meglio.",
+                                    "La felicità spesso si trova nelle piccole cose."
+                                ];
+
+                                emozioneBtns.forEach(btn => {
+                                    btn.addEventListener('click', function() {
+                                        const emozione = btn.getAttribute('data-emozione');
+                                        let risposta = '';
+                                        citazioneTriste.textContent = '';
+                                        if (emozione === 'felice') {
+                                            risposta = risposteFelice[Math.floor(Math.random()*risposteFelice.length)];
+                                        } else if (emozione === 'neutra') {
+                                            risposta = risposteNeutra[Math.floor(Math.random()*risposteNeutra.length)];
+                                        } else if (emozione === 'triste') {
+                                            risposta = risposteTriste[Math.floor(Math.random()*risposteTriste.length)];
+                                            // Mostra citazione randomica per rallegrare
+                                            citazioneTriste.textContent = citazioniTristi[Math.floor(Math.random()*citazioniTristi.length)];
+                                        }
+                                        rispostaEmozione.textContent = risposta;
+                                        chiudiPopupEmozioni.style.display = 'inline-block';
+                                    });
+                                });
+
+                                chiudiPopupEmozioni.addEventListener('click', function() {
+                                    popupEmozioni.style.display = 'none';
+                                    localStorage.removeItem('skipPopupEmozioni');
+                                });
+
+                                // Blocca scroll e interazione finché il popup è visibile
+                                document.body.style.overflow = 'hidden';
+                                window.addEventListener('DOMContentLoaded', function() {
+                                    if (!localStorage.getItem('skipPopupEmozioni')) {
+                                        popupEmozioni.style.display = 'flex';
+                                        document.body.style.overflow = 'hidden';
+                                    } else {
+                                        popupEmozioni.style.display = 'none';
+                                        document.body.style.overflow = '';
+                                        localStorage.removeItem('skipPopupEmozioni');
+                                    }
+                                });
+                                // Quando chiudi il popup, riabilita lo scroll
+                                chiudiPopupEmozioni.addEventListener('click', function() {
+                                    document.body.style.overflow = '';
+                                });
+                        // Notifica pausa ogni ora
+                        const pausaReminder = document.getElementById('pausa-reminder');
+                        let pausaInterval = null;
+                        pausaReminder.addEventListener('click', () => {
+                            if (!('Notification' in window)) {
+                                alert('Questo browser non supporta le notifiche desktop.');
+                                return;
+                            }
+                            Notification.requestPermission().then(perm => {
+                                if (perm === 'granted') {
+                                    pausaReminder.textContent = 'Promemoria pausa attivo!';
+                                    pausaReminder.style.color = '#004d40';
+                                    pausaReminder.style.cursor = 'default';
+                                    pausaReminder.style.textDecoration = 'none';
+                                    if (pausaInterval) clearInterval(pausaInterval);
+                                    // Notifica immediata
+                                    new Notification('MindCare - Pausa', {
+                                        body: 'È il momento di fare una pausa!'
+                                    });
+                                    // Notifica ogni ora (3600000 ms)
+                                    pausaInterval = setInterval(() => {
+                                        new Notification('MindCare - Pausa', {
+                                            body: 'È il momento di fare una pausa!'
+                                        });
+                                    }, 3600000);
+                                } else {
+                                    alert('Hai negato le notifiche. Non posso ricordarti la pausa.');
+                                }
+                            });
+                        });
+                // --- Esercizio di respirazione Bubble Logic ---
+                const btnMeditazione = document.getElementById('btn-meditazione');
+                const meditazioneOverlay = document.getElementById('meditazione-overlay');
+                const meditazioneBubble = document.getElementById('meditazione-bubble');
+                const meditazioneLabel = document.getElementById('meditazione-label');
+                let meditazioneState = 0; // 0: idle, 1: inspiro, 2: trattieni, 3: espiro
+                let meditazioneTimeout = null;
+                let meditazioneCountdown = null;
+                const meditazioneCountdownEl = document.getElementById('meditazione-countdown');
+
+                function startCountdown(sec) {
+                    meditazioneCountdownEl.style.display = 'block';
+                    meditazioneCountdownEl.textContent = sec;
+                    let timeLeft = sec;
+                    if (meditazioneCountdown) clearInterval(meditazioneCountdown);
+                    meditazioneCountdown = setInterval(() => {
+                        timeLeft--;
+                        meditazioneCountdownEl.textContent = timeLeft;
+                        if (timeLeft <= 0) {
+                            clearInterval(meditazioneCountdown);
+                        }
+                    }, 1000);
+                }
+                function stopCountdown() {
+                    meditazioneCountdownEl.style.display = 'none';
+                    if (meditazioneCountdown) clearInterval(meditazioneCountdown);
+                }
+
+                btnMeditazione.addEventListener('click', () => {
+                    meditazioneOverlay.style.display = 'flex';
+                    meditazioneBubble.style.width = '120px';
+                    meditazioneBubble.style.height = '120px';
+                    meditazioneLabel.textContent = 'Respirazione';
+                    meditazioneState = 0;
+                    stopCountdown();
+                });
+
+                meditazioneBubble.addEventListener('click', () => {
+                    if (meditazioneState !== 0) return; // Solo se idle
+                    // Inspiro: ingrandisce per 4s
+                    meditazioneState = 1;
+                    meditazioneLabel.textContent = 'Inspira';
+                    meditazioneBubble.style.transition = 'all 4s cubic-bezier(0.4,0,0.2,1)';
+                    meditazioneBubble.style.width = '260px';
+                    meditazioneBubble.style.height = '260px';
+                    startCountdown(4);
+                    meditazioneTimeout = setTimeout(() => {
+                        // Trattieni: ferma per 7s
+                        meditazioneState = 2;
+                        meditazioneLabel.textContent = 'Trattieni Respiro';
+                        meditazioneBubble.style.transition = 'none';
+                        startCountdown(7);
+                        meditazioneTimeout = setTimeout(() => {
+                            // Espira: sgonfia per 8s
+                            meditazioneState = 3;
+                            meditazioneLabel.textContent = 'Espira';
+                            meditazioneBubble.style.transition = 'all 8s cubic-bezier(0.4,0,0.2,1)';
+                            meditazioneBubble.style.width = '120px';
+                            meditazioneBubble.style.height = '120px';
+                            startCountdown(8);
+                            meditazioneTimeout = setTimeout(() => {
+                                meditazioneLabel.textContent = 'Respirazione';
+                                meditazioneState = 0;
+                                stopCountdown();
+                            }, 8000);
+                        }, 7000);
+                    }, 4000);
+                });
+
+                function closeMeditazione() {
+                    meditazioneOverlay.style.display = 'none';
+                    meditazioneBubble.style.width = '120px';
+                    meditazioneBubble.style.height = '120px';
+                    meditazioneLabel.textContent = 'Respirazione';
+                    meditazioneState = 0;
+                    if (meditazioneTimeout) clearTimeout(meditazioneTimeout);
+                    stopCountdown();
+                }
+        // Registra il Service Worker (obbligatorio per PWA)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
+
+        // Codice MindCare rimosso dalla home
+    </script>
+</body>
+</html>
